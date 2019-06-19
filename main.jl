@@ -1,11 +1,42 @@
 using LinearAlgebra, Printf, SparseArrays
 
 function chol_tri(d, e)
-  # AQUI
+    n = length(d)
+    # G = zeros(n, n)
+    d[1] = sqrt(d[1])
+    for j in 1:n
+        for i in j:n
+            if (abs(i - j) <= 1)
+                if i != j
+                    e[j] = e[j] / d[j]
+                elseif i == j && i != 1
+                    d[i] = sqrt(d[i] - e[i - 1]^2)
+                end
+            end
+        end
+    end
+    return d, e
 end
 
 function resolve_chol_tri(d, e, b)
-  # AQUI
+    n = length(d)
+    chol_tri(d, e)
+    
+    # b = G y
+    ### y = G\b
+    b[1] = b[1] / d[1]
+    for i in 2:n
+        b[i] = (b[i] - e[i - 1] * b[i - 1]) / d[i]
+    end
+    
+    # y = G^T x
+    ### x = G'\y
+    b[4] = b[4] / d[4]
+    for j in (n-1):-1:1
+        b[j] = (b[j] - e[j] * b[j + 1]) / d[j]
+    end
+    
+    return b
 end
 
 function main()
